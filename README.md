@@ -12,7 +12,7 @@ This project extract options data from a dropdowns. The extracted data looks lik
                 }
 }
 
-#Running the spider
+# Running the spider
 
 You can run a spider using the scrapy crawl command, such as:
 $ scrapy crawl challenge
