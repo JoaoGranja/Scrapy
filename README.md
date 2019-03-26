@@ -3,14 +3,8 @@ The scope of this project is to present the basics of scraping a web page to col
 
 # Extracted data
 This project extract options data from a dropdowns. The extracted data looks like this sample:
-{
-'Decision Tree':{ 
-                'A': {
-                     'B', 
-                     'C'
-                     }
-                }
-}
+
+{'Decision Tree': {'A': ['C', 'B'], 'B': ['D', 'E'], 'C': ['D', 'E'], 'E': ['H', 'I', 'J'], 'D': ['H', 'I', 'J'], 'I': ['R'], 'J': ['R'], 'H': ['R']}}
 
 # Running the spider
 
