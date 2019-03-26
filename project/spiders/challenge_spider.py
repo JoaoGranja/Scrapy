@@ -12,12 +12,13 @@ class ChallengeSpider(scrapy.Spider):
         
     def parse(self, response):
         OPTION_SELECTOR = 'option::text'
+        tree = {}
 
-        # Get the last option chosen and last drop number
+        # Get the last selected option and last drop number
         if self.start == False:
             last_option = response.meta['item']
             last_drops  = response.meta['drop_nr']
-            print("last option = ", last_option, last_drops)
+            print("Drop number = ", last_drops)
         else:
             self.start = False
             last_drops = 0
@@ -30,14 +31,15 @@ class ChallengeSpider(scrapy.Spider):
             yield {'Decision Tree': self.result}
         else:
             # Get all options from last drop and iterate over them
+            
             options = drops[len(drops)-1].css(OPTION_SELECTOR).getall()
-            #if last_option is not None:
-            #    self.result[last_option] = options
+            if last_option is not None:
+                tree[last_option] = options
+                print("Tree =", tree)
+                self.result[last_option] = options
                 
             for option in options:
-                if last_option is not None:
-                    self.result[last_option] = option
-                print("options = ", option)
+                print("selected option = ", option)
                 request = scrapy.FormRequest.from_response(
                     response,
                     formdata={'type': 'submit', 'value' :'submit', 'selected': option},
@@ -45,8 +47,6 @@ class ChallengeSpider(scrapy.Spider):
                 request.meta['item'] = option
                 request.meta['drop_nr'] = len(drops)
                 yield request 
-                
-            
 
 
 
