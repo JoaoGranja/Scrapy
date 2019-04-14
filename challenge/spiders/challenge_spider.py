@@ -4,7 +4,7 @@ import scrapy
 class ChallengeSpider(scrapy.Spider):
     name = "challenge"
     start = True
-    result = {}
+    decision_tree = {}
     
     def start_requests(self):
         url = 'https://www.drukzo.nl.joao.hlop.nl/python.php'
@@ -12,40 +12,49 @@ class ChallengeSpider(scrapy.Spider):
         
     def parse(self, response):
         OPTION_SELECTOR = 'option::text'
-        tree = {}
-
-        # Get the last selected option and last drop number
+        
+        # Get the last selected option and total drops number
         if self.start == False:
-            last_option = response.meta['item']
-            last_drops  = response.meta['drop_nr']
-            print("Drop number = ", last_drops)
+            tree         = response.meta['tree']
+            last_option  = response.meta['item']
+            total_drops  = response.meta['total_drops']
+            #print("Drop number = ", total_drops)
         else:
             self.start = False
-            last_drops = 0
+            total_drops = 0
+            tree = {}
             last_option = None
 
-        # Get the drops
+        # Get all drops information
         drops = response.xpath('//select[contains(@id, "drop")]')
-        if len(drops) == last_drops:
-            # No more drops, so yield
-            yield {'Decision Tree': self.result}
+        #print("DROPS :", len(drops))
+        #print(drops)
+        
+        if len(drops) == total_drops:
+            # No more drops, so no more request is needed
+            yield {'Decision Tree': self.decision_tree}
         else:
             # Get all options from last drop and iterate over them
-            
             options = drops[len(drops)-1].css(OPTION_SELECTOR).getall()
-            if last_option is not None:
-                tree[last_option] = options
-                print("Tree =", tree)
-                self.result[last_option] = options
+            print(options)
                 
-            for option in options:
-                print("selected option = ", option)
+            for i, selected_option in enumerate(options):
+                print("selected option = ", selected_option)
+                tree[selected_option] = {}
+                if last_option is not None and i == len(options)-1:
+                    print("before result:", self.decision_tree)
+                    self.decision_tree[last_option] = tree
+                    print("last_option = ", last_option)       
+                    print("tree:", tree)
+                    print("result:", self.decision_tree)
+                    
                 request = scrapy.FormRequest.from_response(
                     response,
-                    formdata={'type': 'submit', 'value' :'submit', 'selected': option},
+                    formdata={'type': 'submit', 'value' :'submit', 'selected': selected_option},
                     callback=self.parse)
-                request.meta['item'] = option
-                request.meta['drop_nr'] = len(drops)
+                request.meta['item'] = selected_option
+                request.meta['tree'] = tree[selected_option]
+                request.meta['total_drops'] = len(drops)
                 yield request 
 
 
